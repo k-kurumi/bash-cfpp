@@ -11,15 +11,15 @@ mkdir -p ${buffer_dir}
 
 function show_apps() {
   local page_index=0
-  local next_url=/v2/apps
+  local next_url=/v2/apps?inline-relations-depth=2
 
   # 全ての情報を取得する
   while [ x${next_url} != xnull ]
   do
     ((page_index++))
     local json=${buffer_dir}/apps.${page_index}.json
-    cf curl ${next_url}?inline-relations-depth=2 > ${json}
-    next_url=`cat $json | jq '.next_url'`
+    cf curl ${next_url} > ${json}
+    next_url=`cat $json | jq -r '.next_url'`
   done
 
   # 表示
@@ -34,15 +34,15 @@ function show_apps() {
 
 function show_services() {
   local page_index=0
-  local next_url=/v2/service_instances
+  local next_url=/v2/service_instances?inline-relations-depth=2
 
   # 全ての情報を取得する
   while [ x${next_url} != xnull ]
   do
     ((page_index++))
     local json=${buffer_dir}/service_instances.${page_index}.json
-    cf curl ${next_url}?inline-relations-depth=2 > ${json}
-    next_url=`cat $json | jq '.next_url'`
+    cf curl ${next_url} > ${json}
+    next_url=`cat $json | jq -r '.next_url'`
   done
 
   # 表示
