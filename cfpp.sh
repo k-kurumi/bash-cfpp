@@ -6,57 +6,50 @@
 export LANG=en_US.UTF-8
 
 # 一時ファイルの書き出し場所
-buffer_dir=/tmp/cfpp/`uuidgen`
+buffer_dir=/tmp/cfpp/`date +%s`
 mkdir -p ${buffer_dir}
 
-function show_apps() {
+# cf curl経由で該当データを取得し、整形して出力する
+function print_category {
+  local category=${1:-"apps"}
   local page_index=0
-  local next_url=/v2/apps?inline-relations-depth=2
+  local next_url=/v2/${category}?inline-relations-depth=2
 
-  # 全ての情報を取得する
+  # 1ページ50件の全てのページを取得する
   while [ x${next_url} != xnull ]
   do
     ((page_index++))
-    local json=${buffer_dir}/apps.${page_index}.json
+    local json=${buffer_dir}/${category}.${page_index}.json
     cf curl ${next_url} > ${json}
     next_url=`cat $json | jq -r '.next_url'`
   done
 
-  # 表示
-  cat ${buffer_dir}/apps.*.json | jq -c '.resources[]| {
-                                                        "app_name": .entity.name,
-                                                        "app_guid": .metadata.guid,
-                                                        "state": .entity.state,
-                                                        "space_name": .entity.space.entity.name,
-                                                        "org_name": .entity.space.entity.organization.entity.name
-                                                      }'
+  jq_filter='.'
+  case "${category}" in
+    "apps")
+      jq_filter='.resources[]| {
+        "app_name": .entity.name,
+        "app_guid": .metadata.guid,
+        "state": .entity.state,
+        "space_name": .entity.space.entity.name,
+        "org_name": .entity.space.entity.organization.entity.name
+      }'
+      ;;
+    "service_instances")
+      jq_filter='.resources[]| {
+        "si_name": .entity.name,
+        "si_guid": .metadata.guid,
+        "space_name": .entity.space.entity.name,
+        "org_name": .entity.space.entity.organization.entity.name
+      }'
+      ;;
+  esac
+
+  cat ${buffer_dir}/${category}.*.json | jq -c "${jq_filter}"
 }
-
-function show_services() {
-  local page_index=0
-  local next_url=/v2/service_instances?inline-relations-depth=2
-
-  # 全ての情報を取得する
-  while [ x${next_url} != xnull ]
-  do
-    ((page_index++))
-    local json=${buffer_dir}/service_instances.${page_index}.json
-    cf curl ${next_url} > ${json}
-    next_url=`cat $json | jq -r '.next_url'`
-  done
-
-  # 表示
-  cat ${buffer_dir}/service_instances.*.json | jq -c '.resources[]| {
-                                                                      "si_name": .entity.name,
-                                                                      "si_guid": .metadata.guid,
-                                                                      "space_name": .entity.space.entity.name,
-                                                                      "org_name": .entity.space.entity.organization.entity.name
-                                                                    }'
-}
-
 
 function usage_exit() {
-  echo "Usage: $0 [-a|-s|-r]"
+  echo "Usage: $0 [-a|-s]"
   exit 1
 }
 
@@ -72,13 +65,10 @@ while getopts asr:h opt
 do
   case ${opt} in
     a)
-      show_apps
-      ;;
-    r)
-      show_routes # FIXME 作る
+      print_category "apps"
       ;;
     s)
-      show_services
+      print_category "service_instances"
       ;;
     *)
       usage_exit
