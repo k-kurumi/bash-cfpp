@@ -80,5 +80,8 @@ do
     s)
       show_services
       ;;
+    *)
+      usage_exit
+      ;;
   esac
 done
