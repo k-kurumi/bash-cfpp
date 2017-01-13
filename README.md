@@ -13,4 +13,4 @@ $ bash cfpp.sh -a
 
 - [x] apps
 - [x] service instances
-- [ ] routes
+- [ ] user provided service instances
