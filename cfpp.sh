@@ -39,6 +39,7 @@ function print_category {
       jq_filter='.resources[]| {
         "si_name": .entity.name,
         "si_guid": .metadata.guid,
+        "label": .entity.service_plan.entity.service.entity.label,
         "space_name": .entity.space.entity.name,
         "org_name": .entity.space.entity.organization.entity.name
       }'
