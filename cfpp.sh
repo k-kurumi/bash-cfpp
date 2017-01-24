@@ -30,6 +30,9 @@ function print_category {
       jq_filter='.resources[]| {
         "app_name": .entity.name,
         "app_guid": .metadata.guid,
+        "memory": .entity.memory,
+        "instances": .entity.instances,
+        "total_memory": (.entity.memory * .entity.instances),
         "state": .entity.state,
         "space_name": .entity.space.entity.name,
         "org_name": .entity.space.entity.organization.entity.name
