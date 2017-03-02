@@ -2,26 +2,28 @@
 #
 # cf curl経由で取得したjsonを整形表示する
 #
+#   NOTE: macは brew install gnu-getopt してBSD版より先に読めるようにすること
+#
 
 export LANG=en_US.UTF-8
 
 # 一時ファイルの書き出し場所
-buffer_dir=/tmp/cfpp/`date +%s`
-mkdir -p ${buffer_dir}
+buffer_dir=/tmp/cfpp/$(date +%s)
+mkdir -p "${buffer_dir}"
 
 # cf curl経由で該当データを取得し、整形して出力する
 function print_category {
   local category=${1:-"apps"}
   local page_index=0
-  local next_url=/v2/${category}?inline-relations-depth=2
+  local next_url="/v2/${category}?inline-relations-depth=2"
 
   # 1ページ50件の全てのページを取得する
-  while [ x${next_url} != xnull ]
+  while [ "x${next_url}" != xnull ]
   do
     ((page_index++))
     local json=${buffer_dir}/${category}.${page_index}.json
-    cf curl ${next_url} > ${json}
-    next_url=`cat $json | jq -r '.next_url'`
+    cf curl "${next_url}" > "${json}"
+    next_url=$(cat "$json" | jq -r '.next_url')
   done
 
   jq_filter='.'
@@ -53,7 +55,7 @@ function print_category {
 }
 
 function usage_exit() {
-  echo "Usage: $0 [-a|-s]"
+  echo "Usage: $0 [--apps|--service_instances]"
   exit 1
 }
 
@@ -64,18 +66,21 @@ if [ $# -eq 0 ]; then
   usage_exit
 fi
 
-# コマンドライン引数の処理
-while getopts asr:h opt
+while true
 do
-  case ${opt} in
-    a)
+  case "$1" in
+    --apps)
       print_category "apps"
+      shift
       ;;
-    s)
+
+    --service_instances)
       print_category "service_instances"
+      shift
       ;;
+
     *)
-      usage_exit
+      break
       ;;
   esac
 done

@@ -6,11 +6,12 @@ cfのAPI結果を整形して表示する
 
 ```
 $ cf login
-$ bash cfpp.sh -a
+$ bash cfpp.sh --apps
 ```
 
 ### todo
 
 - [x] apps
 - [x] service instances
+- [ ] spaces
 - [ ] user provided service instances
