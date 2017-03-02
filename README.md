@@ -13,5 +13,5 @@ $ bash cfpp.sh --apps
 
 - [x] apps
 - [x] service instances
-- [ ] spaces
+- [x] spaces
 - [ ] user provided service instances

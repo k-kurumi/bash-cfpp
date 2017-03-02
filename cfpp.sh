@@ -28,7 +28,7 @@ function print_category {
 
   jq_filter='.'
   case "${category}" in
-    "apps")
+    apps)
       jq_filter='.resources[]| {
         "app_name": .entity.name,
         "app_guid": .metadata.guid,
@@ -40,7 +40,7 @@ function print_category {
         "org_name": .entity.space.entity.organization.entity.name
       }'
       ;;
-    "service_instances")
+    service_instances)
       jq_filter='.resources[]| {
         "si_name": .entity.name,
         "si_guid": .metadata.guid,
@@ -49,13 +49,21 @@ function print_category {
         "org_name": .entity.space.entity.organization.entity.name
       }'
       ;;
+    spaces)
+      jq_filter='.resources[]| {
+        "space_name": .entity.name,
+        "space_guid": .metadata.guid,
+        "org_name": .entity.organization.entity.name,
+        "org_guid": .entity.organization.metadata.guid
+      }'
+      ;;
   esac
 
   cat ${buffer_dir}/${category}.*.json | jq -c "${jq_filter}"
 }
 
 function usage_exit() {
-  echo "Usage: $0 [--apps|--service_instances]"
+  echo "Usage: $0 [--apps|--spaces|--service_instances]"
   exit 1
 }
 
@@ -76,6 +84,11 @@ do
 
     --service_instances)
       print_category "service_instances"
+      shift
+      ;;
+
+    --spaces)
+      print_category "spaces"
       shift
       ;;
 
