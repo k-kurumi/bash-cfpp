@@ -2,8 +2,6 @@
 #
 # cf curl経由で取得したjsonを整形表示する
 #
-#   NOTE: macは brew install gnu-getopt してBSD版より先に読めるようにすること
-#
 
 export LANG=en_US.UTF-8
 
@@ -63,7 +61,10 @@ function print_category {
 }
 
 function usage_exit() {
-  echo "Usage: $0 [--apps|--spaces|--service_instances]"
+  echo "Usage: $0 [option]
+          -a,   -apps       print apps
+          -sp,  -spaces     print spaces
+          -s,   -services   print service instances"
   exit 1
 }
 
@@ -74,26 +75,21 @@ if [ $# -eq 0 ]; then
   usage_exit
 fi
 
-while true
+while [[ $# > 0 ]]
 do
-  case "$1" in
-    --apps)
-      print_category "apps"
-      shift
-      ;;
+  opt=${1}
+  case ${opt} in
+  -a | --apps)
+    print_category "apps"
+    shift;;
 
-    --service_instances)
-      print_category "service_instances"
-      shift
-      ;;
+  -sp | --spaces)
+    print_category "spaces"
+    shift;;
 
-    --spaces)
-      print_category "spaces"
-      shift
-      ;;
+  -s | --services)
+    print_category "service_instances"
+    shift;;
 
-    *)
-      break
-      ;;
   esac
 done
